@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "TabIt",
+  "version": "1.0",
+  "description": "Automatically closes the oldest tab when the number of open tabs exceeds your configured limit.",
+  "permissions": [
+    "tabs",
+    "storage"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "options_page": "options.html",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
