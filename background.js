@@ -1,15 +1,17 @@
 const DEFAULT_MAX_TABS = 10;
 
-// Ordered list of tab IDs, from oldest to newest.
+// Ordered list of non-pinned tab IDs, from oldest to newest.
+// Pinned tabs are excluded: they are not counted toward the limit and are never closed.
 let tabOrder = [];
 
-// Populate tabOrder from all currently open tabs, sorted by tab ID
+// Populate tabOrder from currently open non-pinned tabs, sorted by tab ID
 // (lower IDs were created earlier and serve as a reliable creation-order proxy
 // within a single browser session).
 async function initTabOrder() {
   const tabs = await chrome.tabs.query({});
-  tabs.sort((a, b) => a.id - b.id);
-  tabOrder = tabs.map((tab) => tab.id);
+  const unpinned = tabs.filter((tab) => !tab.pinned);
+  unpinned.sort((a, b) => a.id - b.id);
+  tabOrder = unpinned.map((tab) => tab.id);
 }
 
 // Retrieve the user-configured limit (or the default) from sync storage.
@@ -39,7 +41,7 @@ function queueEnforcement() {
   enforcementQueue = enforcementQueue.then(() => enforceTabLimit());
 }
 
-// When a new tab is opened, record it and apply the limit.
+// When a new tab is opened, record it (new tabs are unpinned) and apply the limit.
 chrome.tabs.onCreated.addListener((tab) => {
   tabOrder.push(tab.id);
   queueEnforcement();
@@ -50,6 +52,21 @@ chrome.tabs.onRemoved.addListener((tabId) => {
   const index = tabOrder.indexOf(tabId);
   if (index !== -1) {
     tabOrder.splice(index, 1);
+  }
+});
+
+// When a tab is pinned or unpinned, update tabOrder so we only count and close unpinned tabs.
+chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
+  if (changeInfo.pinned === true) {
+    const index = tabOrder.indexOf(tabId);
+    if (index !== -1) {
+      tabOrder.splice(index, 1);
+    }
+  } else if (changeInfo.pinned === false) {
+    if (tabOrder.indexOf(tabId) === -1) {
+      tabOrder.push(tabId);
+    }
+    queueEnforcement();
   }
 });
 
