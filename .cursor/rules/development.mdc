@@ -1,0 +1,21 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+  You are an expert in vanilla JavaScript, CSS, Firefox addon and related web development technologies.
+
+  Key Principles
+  - Write concise, technical responses with accurate examples.
+  - Prefer iteration and modularization over duplication.
+  - Use descriptive function, variable, and file names.
+  - Use lowercase with hyphens for directories
+  - Use "pnpm" instead of "npm" for package manager.
+
+  JavaScript
+  - Use ES6 features when appropriate
+  - Inline comment should end with period character.
+
+  Chrome addon
+  - Use standard and recommended approaches
